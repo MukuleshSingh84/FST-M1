@@ -1,56 +1,62 @@
 package Activity;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 public class Activity7 {
     WebDriver driver;
-    @BeforeClass
-    public void beforeClass()
-    {
-        //Firefox driver setup
-        WebDriverManager.firefoxdriver().setup();
-        driver=new FirefoxDriver();
-        //Fetch URL
-        driver.get("https://alchemy.hguy.co/jobs");
-        driver.manage().window().maximize();
-    }
-    @Test
-    public void secondHeading() throws InterruptedException {
-        driver.findElement(By.id("menu-item-26")).click();
-        String pgTitle=driver.findElement(By.className("entry-title")).getText();
-        System.out.println(pgTitle);
-        Assert.assertEquals("Post a Job",pgTitle);
-        driver.findElement(By.id("create_account_email")).sendKeys("me5@gmail.com");
-        driver.findElement(By.id("job_title")).sendKeys("Testing");
-        driver.findElement(By.id("job_description_ifr")).sendKeys("Testing");
-        driver.findElement(By.id("application")).sendKeys("https://google.com");
-        driver.findElement(By.id("company_name")).sendKeys("IBM");
-        //driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-        driver.findElement(By.xpath("//*[@value='Save Draft']")).click();
-        driver.findElement(By.xpath("//input[@value='Preview']")).click();
-        //driver.manage().timeouts().implicitlyWait(100, TimeUnit.SECONDS);
-        driver.findElement(By.xpath("//*[@value='Edit listing']")).getText();
-        driver.findElement(By.id("job_preview_submit_button")).click();
-        driver.findElement(By.id("menu-item-24")).click();
-        driver.findElement(By.id("search_keywords")).sendKeys("Testing");
-        driver.findElement(By.xpath("//input[@value='Search Jobs']")).click();
-        WebElement fstJob= driver.findElement(By.xpath("(//h3[text()='Testing'])[1]"));
-        Assert.assertEquals("Testing",fstJob);
+    WebDriverWait wait;
 
+    @BeforeClass
+    public void beforeClass() {
+        // Set up the Firefox driver
+        //WebDriverManager.firefox().setup();
+        // Initialize Firefox driver object
+        driver = new FirefoxDriver();
+        // Initialize wait object
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        //Open browser
+        driver.get("https://v1.training-support.net/selenium/login-form");
     }
+
+    @DataProvider(name = "Authentication")
+    public static Object[][] credentials() {
+        return new Object[][] { { "admin", "password" }};
+    }
+
+    @Test (dataProvider = "Authentication")
+    public void loginTestCase(String username, String password) {
+        //Find username and pasword fields
+        WebElement usernameField = driver.findElement(By.id("username"));
+        WebElement passwordField = driver.findElement(By.id("password"));
+
+        //Enter values
+        usernameField.sendKeys(username);
+        passwordField.sendKeys(password);
+
+        //Click Log in
+        driver.findElement(By.cssSelector("button[type='submit']")).click();
+
+        //Assert Message
+        String loginMessage = driver.findElement(By.id("action-confirmation")).getText();
+        Assert.assertEquals(loginMessage, "Welcome Back, admin");
+    }
+
     @AfterClass
-    public void afterClass()
-    {
-        //driver.quit();
+    public void afterClass() {
+        //Close browser
+        driver.close();
     }
+
 }
