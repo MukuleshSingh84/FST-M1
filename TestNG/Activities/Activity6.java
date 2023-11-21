@@ -1,54 +1,57 @@
 package Activity;
-
-import com.sun.jna.Structure;
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
-
 
 public class Activity6 {
     WebDriver driver;
+    WebDriverWait wait;
+
     @BeforeClass
-    public void beforeClass()
-    {
-        //Firefox driver setup
-        WebDriverManager.firefoxdriver().setup();
-        driver=new FirefoxDriver();
-        //Fetch URL
-        driver.get("https://alchemy.hguy.co/jobs");
-        driver.manage().window().maximize();
+    public void beforeClass() {
+        // Set up the Firefox driver
+        //WebDriverManager.firefox().setup();
+        // Initialize the Firefox driver
+        driver = new FirefoxDriver();
+        // Initialize the wait object
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        //Open browser
+        driver.get("https://v1.training-support.net/selenium/login-form");
     }
+
     @Test
-    public void secondHeading() throws InterruptedException {
-        driver.findElement(By.id("menu-item-24")).click();
-        String pgTitle=driver.getTitle();
-        System.out.println(pgTitle);
-        Assert.assertEquals("Jobs – Alchemy Jobs",pgTitle);
-        driver.findElement(By.id("search_keywords")).sendKeys("Banking");
-        WebElement SearchJobs= driver.findElement(By.xpath("//input[@value='Search Jobs']"));
-        SearchJobs.click();
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-        WebElement fstJob= driver.findElement(By.xpath("(//h3[text()='Banking'])[1]"));
-        fstJob.click();
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-        WebElement applyJob = driver.findElement(By.xpath("*//input[@value='Apply for job']"));
-        applyJob.click();
-        WebElement emailId = driver.findElement(By.className("job_application_email"));
-        System.out.println(emailId.getText());
+    @Parameters({"username", "password"})
+    public void loginTestCase(String username, String password) {
+        //Find username and pasword fields
+        WebElement usernameField = driver.findElement(By.id("username"));
+        WebElement passwordField = driver.findElement(By.id("password"));
+
+        //Enter values
+        usernameField.sendKeys(username);
+        passwordField.sendKeys(password);
+
+        //Click Log in
+        driver.findElement(By.cssSelector("button[type='submit']")).click();
+
+        //Assert Message
+        String loginMessage = driver.findElement(By.id("action-confirmation")).getText();
+        Assert.assertEquals(loginMessage, "Welcome Back, admin");
     }
+
     @AfterClass
-    public void afterClass()
-    {
-        driver.quit();
+    public void afterClass() {
+        //Close browser
+        driver.close();
     }
+
 }
